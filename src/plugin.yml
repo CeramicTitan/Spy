@@ -1,0 +1,6 @@
+name: Spy
+main: me.ceramictitan.spy.spy
+version: 2.7.4
+depend: [ProtocolLib]
+description: >
+             invisibility plugin.
