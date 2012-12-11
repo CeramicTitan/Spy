@@ -52,9 +52,12 @@ public class Schedulers {
 	                  if (afklimit == afktime) {
 	                	  System.out.println("afklimit == afktime");
 	                    player.sendMessage("You have been forced visible due to AFK!");
+	                    if(playerListener.vanished.contains(player.getName())){
+	                    	playerListener.vanished.remove(player.getName());
 	                    for(Player play : Bukkit.getOnlinePlayers()){
-	                        plugin.toggleVisibilityNative(play, player);
+	                       play.showPlayer(player);
 	                        }
+	                    }
 	                        playerListener.stopTask();
 	                    PlayerData.setAFKTime(player, null);
 	                    PlayerData.unsetLastLocation(player);

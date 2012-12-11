@@ -24,7 +24,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.comphenix.protocol.ProtocolManager;
 
 public class playerListener implements Listener{
 	
@@ -52,8 +51,9 @@ public class playerListener implements Listener{
                 	}
                 	vanished.add(p.getName());
                     for(Player play : Bukkit.getOnlinePlayers()){
-                        plugin.toggleVisibilityNative(play, p);
+                        play.hidePlayer(p);
                         }
+                    this.opCheck();
                     Schedulers.getSchedulers().setup(plugin);
                     Schedulers.getSchedulers().startAFKChecker();
                     p.sendMessage("You are now hidden!");
@@ -72,12 +72,12 @@ public class playerListener implements Listener{
                                         if (p.getItemInHand().getAmount() == 1) {
                                             p.setItemInHand(new ItemStack(Material.AIR, 1));
                                         }
-                                        p.getWorld().playEffect(p.getLocation(), Effect.SMOKE, 30);
+                                        p.getWorld().playEffect(p.getLocation(), Effect.SMOKE, 500);
                                         if (p.getItemInHand().getType() != Material.REDSTONE) {
                                         	if(vanished.contains(p.getName())){
                                         		vanished.remove(p.getName());
                                         	for(Player play : Bukkit.getOnlinePlayers()){
-                                           plugin.toggleVisibilityNative(play, p);
+                                          play.showPlayer(p);
                                             System.out.println("removed!");
  
                                             stopTask();
@@ -93,7 +93,28 @@ public class playerListener implements Listener{
                 }
             }
     }
-    @EventHandler
+
+	@EventHandler
+	public void onInvisibleDamage(EntityDamageByEntityEvent event){
+		if(event.getEntity() instanceof Player){
+			Player p = (Player)event.getEntity();
+			for(String playerName : vanished){
+				Player player = Bukkit.getServer().getPlayerExact(playerName);
+				if(p.canSee(player)){
+					player.getWorld().playEffect(player.getLocation(), Effect.STEP_SOUND, Material.LAVA.getId());
+					if(vanished.contains(player.getName())){
+						vanished.remove(player.getName());
+					}
+					for(Player play: Bukkit.getServer().getOnlinePlayers()){
+					play.showPlayer(player);
+					player.sendMessage("You have been forced visible!");
+					stopTask();
+					}	
+				}
+			}
+		}
+	}
+	@EventHandler
     public void onFoodChange(FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player) {
             final Player player = (Player) event.getEntity();
@@ -129,19 +150,19 @@ public class playerListener implements Listener{
             if(vanished.contains(event.getPlayer().getName())){
             	vanished.remove(event.getPlayer().getName());
                 for(Player play : Bukkit.getOnlinePlayers()){
-                    plugin.toggleVisibilityNative(play, event.getPlayer());
+                    play.showPlayer(event.getPlayer());
                     }
             }
                 System.out.println("!");
             stopTask();
         }
     }
-
-    public void onPlayerLogin(PlayerLoginEvent event, ProtocolManager protocolManager) {
+    @EventHandler
+    public void onPlayerLogin(PlayerLoginEvent event) {
         for (String playerName : vanished) {
             Player player = Bukkit.getPlayerExact(playerName);
             Player loginPlayer = event.getPlayer();
-                plugin.toggleVisibilityNative(loginPlayer, player);           
+                loginPlayer.hidePlayer(player);       
         }
     }
     @EventHandler
@@ -171,6 +192,19 @@ public class playerListener implements Listener{
     public static void stopTask() {
         Bukkit.getServer().getScheduler().cancelTask(id);
     }
+    private void opCheck() {
+		for(Player play : Bukkit.getServer().getOnlinePlayers()){
+			for(String playerName : vanished){
+				Player player = Bukkit.getServer().getPlayerExact(playerName);
+				if(!play.canSee(player)){
+					if(play.hasPermission("spy.see")){
+						play.showPlayer(player);
+				}
+				}
+			}
+		}
+		
+	}
 
 
 }

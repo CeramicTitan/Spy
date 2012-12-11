@@ -57,7 +57,7 @@ public class spy extends JavaPlugin implements Listener {
         pm.registerEvents(this.pl, this);
         loadConfig();
         loadMetrics();
-        this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/server-mods/enchantbroadcaster/files.rss");
+        this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/server-mods/spy/files.rss");
         if(this.updateChecker.updateNeeded() && getConfig().getBoolean("Settings.updateCheck") == true){
                 Bukkit.getConsoleSender().sendMessage(ChatColor.WHITE + prefix + ChatColor.RED+" A new Version of spy " +ChatColor.AQUA+"v"+ this.updateChecker.getVersion() + ChatColor.RED+" is now available!");
                 Bukkit.getConsoleSender().sendMessage(ChatColor.WHITE + prefix + ChatColor.RED+" Download it from BukkitDev: " +ChatColor.AQUA+ this.updateChecker.getLink());
@@ -149,7 +149,7 @@ public class spy extends JavaPlugin implements Listener {
                 return true;
             }
             
-           public void toggleVisibilityNative(Player observer, Player target) {
+           private void toggleVisibilityNative(Player observer, Player target) {
         	   if(observer.canSee(target)){
                 	  observer.hidePlayer(target);
      
